@@ -1,0 +1,27 @@
+use "bytes -> gtk" from "gtk"
+
+fn main() is
+    gtk::init()
+
+    let win: gtk::Window = gtk::new_window("Witaj, H#!", 400, 200)
+
+    let box_: gtk::Box = gtk::new_box(gtk::orientation_vertical(), 12)
+    gtk::set_margin(box_.handle, 16)
+
+    let label: gtk::Label = gtk::new_label("Witaj ze swiata H# + GTK4!")
+    box_.append(label.handle)
+
+    let quit_btn: gtk::Button = gtk::new_button("Wyjdz")
+    box_.append(quit_btn.handle)
+
+    win.set_child(box_.handle)
+
+    let app: gtk::App = gtk::new_app()
+    app.on_click(quit_btn, || is
+        write("Zamykanie aplikacji...")
+        app.quit()
+    end)
+
+    win.present()
+    app.run()
+end
