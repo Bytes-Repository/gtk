@@ -1,1 +1,17 @@
+[package]
+-> name        => gtk
+-> version     => 0.1.0
+-> description => Bindingi GTK4 dla H# — w 100% H#, natywne FFI do libgtk-4 przez extern static [c]
+-> author      => Bytes Developers
+-> license     => MIT
+-> repository  => github.com/Bytes-Repository/gtk
 
+[build]
+-> lang   => h#
+-> entry  => src/gtk.h#
+-> output => build/libgtk_hsharp
+
+[deps]
+-> gtk4               => static   ;; GTK 4.x (widgety) — nazwa modułu pkg-config
+-> glib-2.0           => static   ;; GMainContext / pętla zdarzeń
+-> gobject-2.0        => static   ;; g_object_ref / g_object_unref
