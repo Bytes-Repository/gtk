@@ -1,0 +1,70 @@
+use "bytes -> gtk" from "gtk"
+
+fn main() is
+    gtk::init()
+
+    let win: gtk::Window = gtk::new_window("Licznik + formularz", 420, 260)
+
+    let root: gtk::Box = gtk::new_box(gtk::orientation_vertical(), 10)
+    gtk::set_margin(root.handle, 16)
+
+    ;; ── licznik ────────────────────────────────────────────────────────────
+    let counter_label: gtk::Label = gtk::new_label("Kliknieto: 0 razy")
+    let inc_btn: gtk::Button = gtk::new_button("Kliknij mnie")
+    root.append(counter_label.handle)
+    root.append(inc_btn.handle)
+
+    ;; ── checkbox ───────────────────────────────────────────────────────────
+    let sep1: gtk::Separator = gtk::new_separator(gtk::orientation_horizontal())
+    root.append(sep1.handle)
+
+    let agree: gtk::CheckButton = gtk::new_check_button("Zgadzam sie")
+    let agree_label: gtk::Label = gtk::new_label("Status: nie zaznaczono")
+    root.append(agree.handle)
+    root.append(agree_label.handle)
+
+    ;; ── pole tekstowe ──────────────────────────────────────────────────────
+    let sep2: gtk::Separator = gtk::new_separator(gtk::orientation_horizontal())
+    root.append(sep2.handle)
+
+    let name_entry: gtk::Entry = gtk::new_entry("Wpisz swoje imie...")
+    let greeting: gtk::Label = gtk::new_label("Czesc, nieznajomy!")
+    root.append(name_entry.handle)
+    root.append(greeting.handle)
+
+    let quit_btn: gtk::Button = gtk::new_button("Zamknij")
+    root.append(quit_btn.handle)
+
+    win.set_child(root.handle)
+
+    let mut count: int = 0
+    let app: gtk::App = gtk::new_app()
+
+    app.on_click(inc_btn, || is
+        count += 1
+        counter_label.set_text("Kliknieto: " + to_string(count) + " razy")
+    end)
+
+    app.on_toggle(agree, |active: bool| is
+        if active is
+            agree_label.set_text("Status: zaznaczono")
+        else is
+            agree_label.set_text("Status: nie zaznaczono")
+        end
+    end)
+
+    app.on_change(name_entry, |text: string| is
+        if text.len() == 0 is
+            greeting.set_text("Czesc, nieznajomy!")
+        else is
+            greeting.set_text("Czesc, " + text + "!")
+        end
+    end)
+
+    app.on_click(quit_btn, || is
+        app.quit()
+    end)
+
+    win.present()
+    app.run()
+end
