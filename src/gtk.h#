@@ -1,1 +1,892 @@
+mod gtk_ffi
+use "std -> strings" from "strings"
 
+;; ── Orientacja (GtkOrientation) ───────────────────────────────────────────────
+
+pub fn orientation_horizontal() -> int is return 0 end
+pub fn orientation_vertical()   -> int is return 1 end
+
+;; ── Wyrownanie (GtkAlign) ──────────────────────────────────────────────────────
+
+pub fn align_fill()    -> int is return 0 end
+pub fn align_start()   -> int is return 1 end
+pub fn align_end()     -> int is return 2 end
+pub fn align_center()  -> int is return 3 end
+
+;; ── Inicjalizacja ──────────────────────────────────────────────────────────────
+
+;; Wywolaj raz, przed stworzeniem jakiegokolwiek widgetu.
+pub fn init() is
+    gtk_ffi::gtk_init()
+end
+
+;; ── Widgety — kazdy to po prostu cienki wrapper na `handle: int` ────────────
+
+struct Window is
+    pub handle: int
+end
+
+struct Box is
+    pub handle: int
+end
+
+struct Button is
+    pub handle: int
+end
+
+struct Label is
+    pub handle: int
+end
+
+struct Entry is
+    pub handle: int
+end
+
+struct CheckButton is
+    pub handle: int
+end
+
+struct Grid is
+    pub handle: int
+end
+
+struct Image is
+    pub handle: int
+end
+
+struct Frame is
+    pub handle: int
+end
+
+struct Separator is
+    pub handle: int
+end
+
+struct ScrolledWindow is
+    pub handle: int
+end
+
+struct TextView is
+    pub handle: int
+end
+
+struct ProgressBar is
+    pub handle: int
+end
+
+struct DropDown is
+    pub handle: int
+    pub model:  int
+end
+
+struct SpinButton is
+    pub handle: int
+end
+
+struct ListBox is
+    pub handle: int
+end
+
+struct Stack is
+    pub handle: int
+end
+
+struct StackSwitcher is
+    pub handle: int
+end
+
+struct MenuButton is
+    pub handle: int
+end
+
+struct Popover is
+    pub handle: int
+end
+
+struct CenterBox is
+    pub handle: int
+end
+
+struct Overlay is
+    pub handle: int
+end
+
+;; ── Konstruktory ──────────────────────────────────────────────────────────────
+
+pub fn new_window(title: string, width: int, height: int) -> Window is
+    let h: int = gtk_ffi::gtk_window_new()
+    gtk_ffi::gtk_window_set_title(h, title)
+    gtk_ffi::gtk_window_set_default_size(h, width, height)
+    return Window { handle: h }
+end
+
+pub fn new_box(orientation: int, spacing: int) -> Box is
+    return Box { handle: gtk_ffi::gtk_box_new(orientation, spacing) }
+end
+
+pub fn new_button(label: string) -> Button is
+    return Button { handle: gtk_ffi::gtk_button_new_with_label(label) }
+end
+
+pub fn new_label(text: string) -> Label is
+    return Label { handle: gtk_ffi::gtk_label_new(text) }
+end
+
+pub fn new_entry(placeholder: string) -> Entry is
+    let h: int = gtk_ffi::gtk_entry_new()
+    gtk_ffi::gtk_entry_set_placeholder_text(h, placeholder)
+    return Entry { handle: h }
+end
+
+pub fn new_check_button(label: string) -> CheckButton is
+    return CheckButton { handle: gtk_ffi::gtk_check_button_new_with_label(label) }
+end
+
+pub fn new_grid() -> Grid is
+    return Grid { handle: gtk_ffi::gtk_grid_new() }
+end
+
+pub fn new_image(path: string) -> Image is
+    return Image { handle: gtk_ffi::gtk_image_new_from_file(path) }
+end
+
+pub fn new_frame(label: string) -> Frame is
+    return Frame { handle: gtk_ffi::gtk_frame_new(label) }
+end
+
+pub fn new_separator(orientation: int) -> Separator is
+    return Separator { handle: gtk_ffi::gtk_separator_new(orientation) }
+end
+
+pub fn new_scrolled_window() -> ScrolledWindow is
+    return ScrolledWindow { handle: gtk_ffi::gtk_scrolled_window_new() }
+end
+
+pub fn new_text_view() -> TextView is
+    return TextView { handle: gtk_ffi::gtk_text_view_new() }
+end
+
+pub fn new_progress_bar() -> ProgressBar is
+    return ProgressBar { handle: gtk_ffi::gtk_progress_bar_new() }
+end
+
+;; DropDown zaczyna puste — dodawaj opcje przez `.append(item)`.
+pub fn new_drop_down() -> DropDown is
+    let model: int = gtk_ffi::gtk_string_list_new(0)
+    let h: int = gtk_ffi::gtk_drop_down_new(model, 0)
+    return DropDown { handle: h, model: model }
+end
+
+pub fn new_spin_button(min: f64, max: f64, step: f64) -> SpinButton is
+    return SpinButton { handle: gtk_ffi::gtk_spin_button_new_with_range(min, max, step) }
+end
+
+pub fn new_list_box() -> ListBox is
+    return ListBox { handle: gtk_ffi::gtk_list_box_new() }
+end
+
+pub fn new_stack() -> Stack is
+    return Stack { handle: gtk_ffi::gtk_stack_new() }
+end
+
+pub fn new_stack_switcher(stack: Stack) -> StackSwitcher is
+    let h: int = gtk_ffi::gtk_stack_switcher_new()
+    gtk_ffi::gtk_stack_switcher_set_stack(h, stack.handle)
+    return StackSwitcher { handle: h }
+end
+
+pub fn new_menu_button(label: string) -> MenuButton is
+    let h: int = gtk_ffi::gtk_menu_button_new()
+    gtk_ffi::gtk_menu_button_set_label(h, label)
+    return MenuButton { handle: h }
+end
+
+pub fn new_popover() -> Popover is
+    return Popover { handle: gtk_ffi::gtk_popover_new() }
+end
+
+pub fn new_center_box() -> CenterBox is
+    return CenterBox { handle: gtk_ffi::gtk_center_box_new() }
+end
+
+pub fn new_overlay() -> Overlay is
+    return Overlay { handle: gtk_ffi::gtk_overlay_new() }
+end
+
+;; ── Wspolne operacje na dowolnym widgecie (przyjmuja `handle: int`) ──────────
+
+pub fn show(handle: int) is gtk_ffi::gtk_widget_show(handle) end
+pub fn hide(handle: int) is gtk_ffi::gtk_widget_hide(handle) end
+
+pub fn set_visible(handle: int, visible: bool) is
+    if visible is gtk_ffi::gtk_widget_set_visible(handle, 1)
+    else is gtk_ffi::gtk_widget_set_visible(handle, 0) end
+end
+
+pub fn set_sensitive(handle: int, sensitive: bool) is
+    if sensitive is gtk_ffi::gtk_widget_set_sensitive(handle, 1)
+    else is gtk_ffi::gtk_widget_set_sensitive(handle, 0) end
+end
+
+pub fn set_size(handle: int, width: int, height: int) is
+    gtk_ffi::gtk_widget_set_size_request(handle, width, height)
+end
+
+pub fn set_margin(handle: int, margin: int) is
+    gtk_ffi::gtk_widget_set_margin_top(handle, margin)
+    gtk_ffi::gtk_widget_set_margin_bottom(handle, margin)
+    gtk_ffi::gtk_widget_set_margin_start(handle, margin)
+    gtk_ffi::gtk_widget_set_margin_end(handle, margin)
+end
+
+pub fn set_align(handle: int, halign: int, valign: int) is
+    gtk_ffi::gtk_widget_set_halign(handle, halign)
+    gtk_ffi::gtk_widget_set_valign(handle, valign)
+end
+
+pub fn set_expand(handle: int, hexpand: bool, vexpand: bool) is
+    if hexpand is gtk_ffi::gtk_widget_set_hexpand(handle, 1)
+    else is gtk_ffi::gtk_widget_set_hexpand(handle, 0) end
+    if vexpand is gtk_ffi::gtk_widget_set_vexpand(handle, 1)
+    else is gtk_ffi::gtk_widget_set_vexpand(handle, 0) end
+end
+
+pub fn add_css_class(handle: int, class_name: string) is
+    gtk_ffi::gtk_widget_add_css_class(handle, class_name)
+end
+
+pub fn remove_css_class(handle: int, class_name: string) is
+    gtk_ffi::gtk_widget_remove_css_class(handle, class_name)
+end
+
+pub fn grab_focus(handle: int) is
+    gtk_ffi::gtk_widget_grab_focus(handle)
+end
+
+;; ── Window ────────────────────────────────────────────────────────────────────
+
+impl Window is
+    fn set_child(self, child: int) is
+        gtk_ffi::gtk_window_set_child(self.handle, child)
+    end
+
+    fn present(self) is
+        gtk_ffi::gtk_window_present(self.handle)
+    end
+
+    fn show(self) is
+        gtk_ffi::gtk_widget_show(self.handle)
+    end
+
+    fn set_title(self, title: string) is
+        gtk_ffi::gtk_window_set_title(self.handle, title)
+    end
+
+    fn set_resizable(self, resizable: bool) is
+        if resizable is gtk_ffi::gtk_window_set_resizable(self.handle, 1)
+        else is gtk_ffi::gtk_window_set_resizable(self.handle, 0) end
+    end
+
+    fn maximize(self) is gtk_ffi::gtk_window_maximize(self.handle) end
+    fn minimize(self) is gtk_ffi::gtk_window_minimize(self.handle) end
+    fn fullscreen(self) is gtk_ffi::gtk_window_fullscreen(self.handle) end
+
+    ;; Niszczy okno natychmiast (np. po `app.quit()`, jesli chcesz tez
+    ;; posprzatac widget zamiast tylko zatrzymac petle).
+    fn destroy(self) is
+        gtk_ffi::gtk_window_destroy(self.handle)
+    end
+end
+
+;; ── Box ───────────────────────────────────────────────────────────────────────
+
+impl Box is
+    fn append(self, child: int) is
+        gtk_ffi::gtk_box_append(self.handle, child)
+    end
+
+    fn remove(self, child: int) is
+        gtk_ffi::gtk_box_remove(self.handle, child)
+    end
+
+    fn set_spacing(self, spacing: int) is
+        gtk_ffi::gtk_box_set_spacing(self.handle, spacing)
+    end
+
+    fn set_homogeneous(self, homogeneous: bool) is
+        if homogeneous is gtk_ffi::gtk_box_set_homogeneous(self.handle, 1)
+        else is gtk_ffi::gtk_box_set_homogeneous(self.handle, 0) end
+    end
+end
+
+;; ── Button ────────────────────────────────────────────────────────────────────
+
+impl Button is
+    fn set_label(self, label: string) is
+        gtk_ffi::gtk_button_set_label(self.handle, label)
+    end
+
+    ;; Biezacy (natychmiastowy) stan "wcisniety" — czysty odczyt stanu GTK,
+    ;; w 100% wiarygodny. Przydatne np. do animacji "press and hold".
+    fn is_pressed(self) -> bool is
+        let flags: int = gtk_ffi::gtk_widget_get_state_flags(self.handle)
+        return (flags & 1) != 0   ;; GTK_STATE_FLAG_ACTIVE
+    end
+end
+
+;; ── Label ─────────────────────────────────────────────────────────────────────
+
+impl Label is
+    fn set_text(self, text: string) is
+        gtk_ffi::gtk_label_set_text(self.handle, text)
+    end
+
+    fn set_wrap(self, wrap: bool) is
+        if wrap is gtk_ffi::gtk_label_set_wrap(self.handle, 1)
+        else is gtk_ffi::gtk_label_set_wrap(self.handle, 0) end
+    end
+
+    fn set_xalign(self, xalign: f64) is
+        gtk_ffi::gtk_label_set_xalign(self.handle, xalign)
+    end
+end
+
+;; ── Entry ─────────────────────────────────────────────────────────────────────
+
+impl Entry is
+    fn text(self) -> string is
+        return gtk_ffi::gtk_editable_get_text(self.handle)
+    end
+
+    fn set_text(self, text: string) is
+        gtk_ffi::gtk_editable_set_text(self.handle, text)
+    end
+end
+
+;; ── CheckButton ───────────────────────────────────────────────────────────────
+
+impl CheckButton is
+    fn is_active(self) -> bool is
+        return gtk_ffi::gtk_check_button_get_active(self.handle) != 0
+    end
+
+    fn set_active(self, active: bool) is
+        if active is gtk_ffi::gtk_check_button_set_active(self.handle, 1)
+        else is gtk_ffi::gtk_check_button_set_active(self.handle, 0) end
+    end
+end
+
+;; ── Grid ──────────────────────────────────────────────────────────────────────
+
+impl Grid is
+    fn attach(self, child: int, column: int, row: int, w: int, h: int) is
+        gtk_ffi::gtk_grid_attach(self.handle, child, column, row, w, h)
+    end
+
+    fn set_row_spacing(self, spacing: int) is
+        gtk_ffi::gtk_grid_set_row_spacing(self.handle, spacing)
+    end
+
+    fn set_column_spacing(self, spacing: int) is
+        gtk_ffi::gtk_grid_set_column_spacing(self.handle, spacing)
+    end
+end
+
+;; ── Frame / ScrolledWindow ─────────────────────────────────────────────────────
+
+impl Frame is
+    fn set_child(self, child: int) is
+        gtk_ffi::gtk_frame_set_child(self.handle, child)
+    end
+
+    fn set_label(self, label: string) is
+        gtk_ffi::gtk_frame_set_label(self.handle, label)
+    end
+end
+
+impl ScrolledWindow is
+    fn set_child(self, child: int) is
+        gtk_ffi::gtk_scrolled_window_set_child(self.handle, child)
+    end
+end
+
+;; ── ProgressBar ───────────────────────────────────────────────────────────────
+
+impl ProgressBar is
+    fn set_fraction(self, fraction: f64) is
+        gtk_ffi::gtk_progress_bar_set_fraction(self.handle, fraction)
+    end
+end
+
+;; ── DropDown ──────────────────────────────────────────────────────────────────
+
+impl DropDown is
+    fn append(self, item: string) is
+        gtk_ffi::gtk_string_list_append(self.model, item)
+    end
+
+    ;; Indeks zaznaczonej opcji (0-based), albo `-1` jesli nic nie wybrano.
+    fn selected(self) -> int is
+        let pos: int = gtk_ffi::gtk_drop_down_get_selected(self.handle)
+        if pos == 4294967295 is return -1 end
+        return pos
+    end
+
+    fn set_selected(self, position: int) is
+        gtk_ffi::gtk_drop_down_set_selected(self.handle, position)
+    end
+end
+
+;; ── SpinButton ────────────────────────────────────────────────────────────────
+
+impl SpinButton is
+    fn value(self) -> f64 is
+        return gtk_ffi::gtk_spin_button_get_value(self.handle)
+    end
+
+    fn set_value(self, value: f64) is
+        gtk_ffi::gtk_spin_button_set_value(self.handle, value)
+    end
+
+    fn set_digits(self, digits: int) is
+        gtk_ffi::gtk_spin_button_set_digits(self.handle, digits)
+    end
+end
+
+;; ── ListBox ───────────────────────────────────────────────────────────────────
+
+pub fn selection_mode_none()     -> int is return 0 end
+pub fn selection_mode_single()   -> int is return 1 end
+pub fn selection_mode_browse()   -> int is return 2 end
+pub fn selection_mode_multiple() -> int is return 3 end
+
+impl ListBox is
+    fn append(self, child: int) is
+        gtk_ffi::gtk_list_box_append(self.handle, child)
+    end
+
+    fn remove(self, child: int) is
+        gtk_ffi::gtk_list_box_remove(self.handle, child)
+    end
+
+    fn set_selection_mode(self, mode: int) is
+        gtk_ffi::gtk_list_box_set_selection_mode(self.handle, mode)
+    end
+
+    ;; Indeks zaznaczonego wiersza (0-based), albo `-1` jesli nic nie wybrano.
+    fn selected_index(self) -> int is
+        let row: int = gtk_ffi::gtk_list_box_get_selected_row(self.handle)
+        if row == 0 is return -1 end
+        return gtk_ffi::gtk_list_box_row_get_index(row)
+    end
+end
+
+;; ── Stack / StackSwitcher ──────────────────────────────────────────────────────
+
+impl Stack is
+    fn add_titled(self, child: int, name: string, title: string) is
+        gtk_ffi::gtk_stack_add_titled(self.handle, child, name, title)
+    end
+
+    fn set_visible(self, name: string) is
+        gtk_ffi::gtk_stack_set_visible_child_name(self.handle, name)
+    end
+
+    fn visible(self) -> string is
+        return gtk_ffi::gtk_stack_get_visible_child_name(self.handle)
+    end
+end
+
+;; ── MenuButton / Popover ────────────────────────────────────────────────────────
+
+impl MenuButton is
+    fn set_popover(self, popover: Popover) is
+        gtk_ffi::gtk_menu_button_set_popover(self.handle, popover.handle)
+    end
+
+    fn set_label(self, label: string) is
+        gtk_ffi::gtk_menu_button_set_label(self.handle, label)
+    end
+end
+
+impl Popover is
+    fn set_child(self, child: int) is
+        gtk_ffi::gtk_popover_set_child(self.handle, child)
+    end
+
+    fn popup(self) is gtk_ffi::gtk_popover_popup(self.handle) end
+    fn popdown(self) is gtk_ffi::gtk_popover_popdown(self.handle) end
+end
+
+;; ── CenterBox / Overlay ─────────────────────────────────────────────────────────
+
+impl CenterBox is
+    fn set_start(self, child: int) is
+        gtk_ffi::gtk_center_box_set_start_widget(self.handle, child)
+    end
+
+    fn set_center(self, child: int) is
+        gtk_ffi::gtk_center_box_set_center_widget(self.handle, child)
+    end
+
+    fn set_end(self, child: int) is
+        gtk_ffi::gtk_center_box_set_end_widget(self.handle, child)
+    end
+end
+
+impl Overlay is
+    fn set_child(self, child: int) is
+        gtk_ffi::gtk_overlay_set_child(self.handle, child)
+    end
+
+    fn add_overlay(self, child: int) is
+        gtk_ffi::gtk_overlay_add_overlay(self.handle, child)
+    end
+
+    fn remove_overlay(self, child: int) is
+        gtk_ffi::gtk_overlay_remove_overlay(self.handle, child)
+    end
+end
+
+;; ── CSS ───────────────────────────────────────────────────────────────────────
+
+pub fn style_priority_application() -> int is return 600 end
+pub fn style_priority_user()        -> int is return 800 end
+
+;; Wczytuje arkusz CSS z tekstu i podpina go pod domyslny display —
+;; obejmie od razu wszystkie okna aplikacji.
+pub fn load_css(css: string) is
+    let provider: int = gtk_ffi::gtk_css_provider_new()
+    gtk_ffi::gtk_css_provider_load_from_string(provider, css)
+    let display: int = gtk_ffi::gdk_display_get_default()
+    gtk_ffi::gtk_style_context_add_provider_for_display(display, provider, style_priority_application())
+end
+
+;; Jak `load_css`, ale wczytuje arkusz z pliku `.css` na dysku.
+pub fn load_css_file(path: string) is
+    let provider: int = gtk_ffi::gtk_css_provider_new()
+    gtk_ffi::gtk_css_provider_load_from_path(provider, path)
+    let display: int = gtk_ffi::gdk_display_get_default()
+    gtk_ffi::gtk_style_context_add_provider_for_display(display, provider, style_priority_application())
+end
+
+;; ── AlertDialog (GTK >= 4.10) — prosty komunikat, bez odczytu wyboru ────────
+;; Zwraca sie od razu (fire-and-forget). Jesli potrzebujesz przyciskow z
+;; odczytem wyboru uzytkownika, to (tak jak `close-request`) wymaga
+;; asynchronicznego C-owego callbacku i jest poza zakresem biblioteki w
+;; 100% H# — patrz README.md, sekcja "Znane ograniczenia".
+pub fn show_alert(parent: Window, message: string, detail: string) is
+    let safe_message: string = strings::replace_all(message, "%", "%%")
+    let dialog: int = gtk_ffi::gtk_alert_dialog_new(safe_message)
+    gtk_ffi::gtk_alert_dialog_set_modal(dialog, 1)
+    if detail.len() > 0 is
+        gtk_ffi::gtk_alert_dialog_set_detail(dialog, detail)
+    end
+    gtk_ffi::gtk_alert_dialog_show(dialog, parent.handle)
+end
+
+;; ── App — petla glowna + zdarzenia w 100% przez polling (zero C) ─────────────
+;;
+;; `App` trzyma listy „obserwowanych” widgetow i porownuje ich stan w kazdej
+;; iteracji `run()` z tym z poprzedniej iteracji; gdy wykryje zmiane,
+;; wola zarejestrowane domkniecie H#. Zero sygnalow GObject, zero C.
+
+struct App is
+    pub btn_widget:   [int]
+    pub btn_prev:     [int]
+    pub btn_cb:       [fn() -> void]
+
+    pub chk_widget:   [int]
+    pub chk_prev:     [int]
+    pub chk_cb:       [fn(bool) -> void]
+
+    pub entry_widget: [int]
+    pub entry_prev:   [string]
+    pub entry_cb:     [fn(string) -> void]
+
+    pub hover_widget: [int]
+    pub hover_prev:   [int]
+    pub hover_cb:     [fn(bool) -> void]
+
+    pub submit_widget: [int]
+    pub submit_prev:   [int]
+    pub submit_cb:     [fn() -> void]
+
+    pub listbox_widget: [int]
+    pub listbox_prev:   [int]
+    pub listbox_cb:     [fn(int) -> void]
+
+    pub dropdown_widget: [int]
+    pub dropdown_prev:   [int]
+    pub dropdown_cb:     [fn(int) -> void]
+
+    pub stack_widget: [int]
+    pub stack_prev:   [string]
+    pub stack_cb:     [fn(string) -> void]
+
+    pub win_widget: [int]
+    pub win_prev:   [int]
+    pub win_cb:     [fn() -> void]
+
+    pub spin_widget: [int]
+    pub spin_prev:   [f64]
+    pub spin_cb:     [fn(f64) -> void]
+
+    pub running:      bool
+end
+
+pub fn new_app() -> App is
+    return App {
+        btn_widget:   [], btn_prev:   [], btn_cb:   [],
+        chk_widget:   [], chk_prev:   [], chk_cb:   [],
+        entry_widget: [], entry_prev: [], entry_cb: [],
+        hover_widget: [], hover_prev: [], hover_cb: [],
+        submit_widget: [], submit_prev: [], submit_cb: [],
+        listbox_widget: [], listbox_prev: [], listbox_cb: [],
+        dropdown_widget: [], dropdown_prev: [], dropdown_cb: [],
+        stack_widget: [], stack_prev: [], stack_cb: [],
+        win_widget: [], win_prev: [], win_cb: [],
+        spin_widget: [], spin_prev: [], spin_cb: [],
+        running:      true,
+    }
+end
+
+;; Mala pomocnicza funkcja wykrywania zbocza wciśnięcie→puszczenie (uzywana
+;; zarowno dla klikniec przyciskow jak i dla "submit" po utracie fokusu),
+;; zeby petle w `poll()` nie powielaly tej samej logiki porownania w kolko.
+fn edge_high_to_low(prev: int, cur: int) -> bool is
+    return prev == 1 && cur == 0
+end
+
+impl App is
+    ;; Rejestruje domkniecie wolane przy wykryciu klikniecia przycisku
+    ;; (zbocze wcisniecie→puszczenie na fladze stanu GTK_STATE_FLAG_ACTIVE).
+    fn on_click(self, button: Button, cb: fn() -> void) is
+        self.btn_widget.push(button.handle)
+        self.btn_prev.push(0)
+        self.btn_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie stanu checkboksa;
+    ;; dostaje nowy stan (`true`/`false`) jako argument.
+    fn on_toggle(self, check: CheckButton, cb: fn(bool) -> void) is
+        self.chk_widget.push(check.handle)
+        self.chk_prev.push(gtk_ffi::gtk_check_button_get_active(check.handle))
+        self.chk_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie tekstu w polu
+    ;; (dostaje nowa tresc jako argument).
+    fn on_change(self, entry: Entry, cb: fn(string) -> void) is
+        self.entry_widget.push(entry.handle)
+        self.entry_prev.push(gtk_ffi::gtk_editable_get_text(entry.handle))
+        self.entry_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie stanu "najechania
+    ;; myszka" (flaga GTK_STATE_FLAG_PRELIGHT) na dowolnym widgecie —
+    ;; dostaje nowy stan (`true` = kursor nad widgetem) jako argument.
+    ;; W 100% wiarygodne (zwykly odczyt stanu, tak jak `on_toggle`).
+    fn on_hover(self, handle: int, cb: fn(bool) -> void) is
+        self.hover_widget.push(handle)
+        self.hover_prev.push(0)
+        self.hover_cb.push(cb)
+    end
+
+    ;; Przyblizone "zatwierdzenie" pola tekstowego przez utrate fokusu
+    ;; (zbocze flagi GTK_STATE_FLAG_FOCUS_WITHIN wysoko→nisko, czyli
+    ;; "uzytkownik przeszedl gdzie indziej"). To NIE jest realny sygnal
+    ;; "activate" (Enter) — ten wymaga GtkEventController + sygnalu, wiec
+    ;; C-owego callbacku, poza zakresem biblioteki w 100% H#. `on_submit`
+    ;; to najblizsze uczciwe przyblizenie osiagalne samym pollingiem.
+    fn on_submit(self, entry: Entry, cb: fn() -> void) is
+        self.submit_widget.push(entry.handle)
+        self.submit_prev.push(0)
+        self.submit_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie zaznaczonego wiersza
+    ;; w `ListBox`; dostaje nowy indeks (0-based, `-1` = brak zaznaczenia).
+    ;; W 100% wiarygodne.
+    fn on_selection_change(self, list_box: ListBox, cb: fn(int) -> void) is
+        self.listbox_widget.push(list_box.handle)
+        self.listbox_prev.push(list_box.selected_index())
+        self.listbox_cb.push(cb)
+    end
+
+    ;; Jak wyzej, ale dla `DropDown`.
+    fn on_dropdown_change(self, dropdown: DropDown, cb: fn(int) -> void) is
+        self.dropdown_widget.push(dropdown.handle)
+        self.dropdown_prev.push(dropdown.selected())
+        self.dropdown_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie widocznej "strony"
+    ;; `Stack`; dostaje nazwe nowej strony. W 100% wiarygodne.
+    fn on_view_change(self, stack: Stack, cb: fn(string) -> void) is
+        self.stack_widget.push(stack.handle)
+        self.stack_prev.push(stack.visible())
+        self.stack_cb.push(cb)
+    end
+
+    ;; Najlepsze mozliwe (bez C) przyblizenie sygnalu `close-request`:
+    ;; trzyma dodatkowa referencje (`g_object_ref`) na oknie, zeby bylo
+    ;; bezpiecznie odpytywac jego stan `mapped` nawet po tym, jak domyslny
+    ;; handler GTK zniszczy widget po kliknieciu w „X”. Gdy `mapped`
+    ;; spadnie z 1 na 0, wolane jest `cb`. Jesli chcesz zeby to jednoczesnie
+    ;; konczylo `run()`, wywolaj w `cb` po prostu `app.quit()`.
+    fn on_window_close(self, window: Window, cb: fn() -> void) is
+        gtk_ffi::g_object_ref(window.handle)
+        self.win_widget.push(window.handle)
+        self.win_prev.push(1)
+        self.win_cb.push(cb)
+    end
+
+    ;; Rejestruje domkniecie wolane przy kazdej zmianie wartosci `SpinButton`;
+    ;; dostaje nowa wartosc jako argument. W 100% wiarygodne.
+    fn on_value_change(self, spin: SpinButton, cb: fn(f64) -> void) is
+        self.spin_widget.push(spin.handle)
+        self.spin_prev.push(spin.value())
+        self.spin_cb.push(cb)
+    end
+
+    ;; Zatrzymuje `run()` po zakonczeniu biezacej iteracji. Najprosciej
+    ;; podlaczyc to pod `on_click` przycisku "Wyjdz", albo pod
+    ;; `on_window_close` (patrz nizej) dla przyblizenia klikniecia „X”.
+    fn quit(self) is
+        self.running = false
+    end
+
+    ;; Jedno przejscie po wszystkich obserwowanych widgetach — wywolywane
+    ;; automatycznie przez `run()`, ale mozesz je wolac recznie we wlasnej
+    ;; petli, jesli potrzebujesz pelnej kontroli nad iteracja.
+    fn poll(self) is
+        let mut i: int = 0
+        while i < self.btn_widget.len() is
+            let flags: int  = gtk_ffi::gtk_widget_get_state_flags(self.btn_widget[i])
+            let active: int = flags & 1
+            if self.btn_prev[i] == 1 && active == 0 is
+                let cb = self.btn_cb[i]
+                cb()
+            end
+            self.btn_prev[i] = active
+            i += 1
+        end
+
+        i = 0
+        while i < self.chk_widget.len() is
+            let active: int = gtk_ffi::gtk_check_button_get_active(self.chk_widget[i])
+            if active != self.chk_prev[i] is
+                let cb = self.chk_cb[i]
+                cb(active != 0)
+            end
+            self.chk_prev[i] = active
+            i += 1
+        end
+
+        i = 0
+        while i < self.entry_widget.len() is
+            let txt: string = gtk_ffi::gtk_editable_get_text(self.entry_widget[i])
+            if txt != self.entry_prev[i] is
+                let cb = self.entry_cb[i]
+                cb(txt)
+            end
+            self.entry_prev[i] = txt
+            i += 1
+        end
+
+        i = 0
+        while i < self.hover_widget.len() is
+            let flags: int  = gtk_ffi::gtk_widget_get_state_flags(self.hover_widget[i])
+            let hovered: int = if (flags & 2) != 0 then 1 else 0   ;; GTK_STATE_FLAG_PRELIGHT
+            if hovered != self.hover_prev[i] is
+                let cb = self.hover_cb[i]
+                cb(hovered == 1)
+            end
+            self.hover_prev[i] = hovered
+            i += 1
+        end
+
+        i = 0
+        while i < self.submit_widget.len() is
+            let flags: int   = gtk_ffi::gtk_widget_get_state_flags(self.submit_widget[i])
+            let focused: int = if (flags & 16384) != 0 then 1 else 0   ;; GTK_STATE_FLAG_FOCUS_WITHIN
+            if edge_high_to_low(self.submit_prev[i], focused) is
+                let cb = self.submit_cb[i]
+                cb()
+            end
+            self.submit_prev[i] = focused
+            i += 1
+        end
+
+        i = 0
+        while i < self.listbox_widget.len() is
+            let row: int = gtk_ffi::gtk_list_box_get_selected_row(self.listbox_widget[i])
+            let mut idx: int = -1
+            if row != 0 is idx = gtk_ffi::gtk_list_box_row_get_index(row) end
+            if idx != self.listbox_prev[i] is
+                let cb = self.listbox_cb[i]
+                cb(idx)
+            end
+            self.listbox_prev[i] = idx
+            i += 1
+        end
+
+        i = 0
+        while i < self.dropdown_widget.len() is
+            let raw: int = gtk_ffi::gtk_drop_down_get_selected(self.dropdown_widget[i])
+            let mut idx: int = raw
+            if raw == 4294967295 is idx = -1 end
+            if idx != self.dropdown_prev[i] is
+                let cb = self.dropdown_cb[i]
+                cb(idx)
+            end
+            self.dropdown_prev[i] = idx
+            i += 1
+        end
+
+        i = 0
+        while i < self.stack_widget.len() is
+            let name: string = gtk_ffi::gtk_stack_get_visible_child_name(self.stack_widget[i])
+            if name != self.stack_prev[i] is
+                let cb = self.stack_cb[i]
+                cb(name)
+            end
+            self.stack_prev[i] = name
+            i += 1
+        end
+
+        i = 0
+        while i < self.win_widget.len() is
+            let mapped: int = gtk_ffi::gtk_widget_get_mapped(self.win_widget[i])
+            if edge_high_to_low(self.win_prev[i], mapped) is
+                let cb = self.win_cb[i]
+                cb()
+            end
+            self.win_prev[i] = mapped
+            i += 1
+        end
+
+        i = 0
+        while i < self.spin_widget.len() is
+            let value: f64 = gtk_ffi::gtk_spin_button_get_value(self.spin_widget[i])
+            if value != self.spin_prev[i] is
+                let cb = self.spin_cb[i]
+                cb(value)
+            end
+            self.spin_prev[i] = value
+            i += 1
+        end
+    end
+
+    ;; Petla glowna aplikacji: kreci prawdziwa petla zdarzen GLib
+    ;; (`g_main_context_iteration`, wiec rysowanie, input, resize itd.
+    ;; dzialaja w 100% tak samo jak w kazdej innej appce GTK4) i po kazdej
+    ;; iteracji sprawdza zarejestrowane widgety pod katem zmian stanu.
+    fn run(self) is
+        while self.running is
+            gtk_ffi::g_main_context_iteration(0, 1)
+            self.poll()
+        end
+    end
+end
