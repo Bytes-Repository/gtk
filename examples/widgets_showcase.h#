@@ -1,0 +1,107 @@
+use "bytes -> gtk" from "gtk"
+
+fn main() is
+    gtk::init()
+
+    ;; wlasny styl — kolorowy naglowek
+    gtk::load_css("
+        .naglowek { font-weight: bold; font-size: 16px; color: #3b82f6; }
+        .hover-hint { color: #16a34a; }
+    ")
+
+    let win: gtk::Window = gtk::new_window("Witryna widgetow H# + GTK4", 480, 420)
+    let root: gtk::Box = gtk::new_box(gtk::orientation_vertical(), 10)
+    gtk::set_margin(root.handle, 16)
+
+    let header: gtk::Label = gtk::new_label("Nowe widgety w bibliotece gtk")
+    gtk::add_css_class(header.handle, "naglowek")
+    root.append(header.handle)
+
+    ;; ── DropDown ───────────────────────────────────────────────────────────
+    let colors: gtk::DropDown = gtk::new_drop_down()
+    colors.append("Czerwony")
+    colors.append("Zielony")
+    colors.append("Niebieski")
+    let color_label: gtk::Label = gtk::new_label("Wybrany kolor: (brak)")
+    root.append(colors.handle)
+    root.append(color_label.handle)
+
+    ;; ── SpinButton ─────────────────────────────────────────────────────────
+    let age: gtk::SpinButton = gtk::new_spin_button(0.0, 120.0, 1.0)
+    let age_label: gtk::Label = gtk::new_label("Wiek: 0")
+    root.append(age.handle)
+    root.append(age_label.handle)
+
+    ;; ── ListBox ────────────────────────────────────────────────────────────
+    let fruits: gtk::ListBox = gtk::new_list_box()
+    fruits.set_selection_mode(gtk::selection_mode_single())
+    fruits.append(gtk::new_label("Jablko").handle)
+    fruits.append(gtk::new_label("Gruszka").handle)
+    fruits.append(gtk::new_label("Sliwka").handle)
+    let fruit_label: gtk::Label = gtk::new_label("Wybrany owoc: (brak)")
+    root.append(fruits.handle)
+    root.append(fruit_label.handle)
+
+    ;; ── Stack + StackSwitcher ──────────────────────────────────────────────
+    let stack: gtk::Stack = gtk::new_stack()
+    let page1: gtk::Label = gtk::new_label("Strona pierwsza")
+    let page2: gtk::Label = gtk::new_label("Strona druga")
+    stack.add_titled(page1.handle, "p1", "Pierwsza")
+    stack.add_titled(page2.handle, "p2", "Druga")
+    let switcher: gtk::StackSwitcher = gtk::new_stack_switcher(stack)
+    root.append(switcher.handle)
+    root.append(stack.handle)
+
+    ;; ── hover ──────────────────────────────────────────────────────────────
+    let hover_btn: gtk::Button = gtk::new_button("Najedz na mnie mysza")
+    let hover_label: gtk::Label = gtk::new_label("...")
+    root.append(hover_btn.handle)
+    root.append(hover_label.handle)
+
+    ;; ── AlertDialog + wyjscie ──────────────────────────────────────────────
+    let alert_btn: gtk::Button = gtk::new_button("Pokaz komunikat")
+    let quit_btn: gtk::Button = gtk::new_button("Zamknij")
+    root.append(alert_btn.handle)
+    root.append(quit_btn.handle)
+
+    win.set_child(root.handle)
+
+    let app: gtk::App = gtk::new_app()
+
+    app.on_dropdown_change(colors, |idx: int| is
+        if idx == 0 is color_label.set_text("Wybrany kolor: Czerwony") end
+        if idx == 1 is color_label.set_text("Wybrany kolor: Zielony") end
+        if idx == 2 is color_label.set_text("Wybrany kolor: Niebieski") end
+    end)
+
+    app.on_selection_change(fruits, |idx: int| is
+        if idx == 0 is fruit_label.set_text("Wybrany owoc: Jablko") end
+        if idx == 1 is fruit_label.set_text("Wybrany owoc: Gruszka") end
+        if idx == 2 is fruit_label.set_text("Wybrany owoc: Sliwka") end
+    end)
+
+    app.on_hover(hover_btn.handle, |hovering: bool| is
+        if hovering is
+            hover_label.set_text("Kursor jest nad przyciskiem!")
+            gtk::add_css_class(hover_label.handle, "hover-hint")
+        else is
+            hover_label.set_text("...")
+            gtk::remove_css_class(hover_label.handle, "hover-hint")
+        end
+    end)
+
+    app.on_value_change(age, |value: f64| is
+        age_label.set_text("Wiek: " + to_string(value))
+    end)
+
+    app.on_click(alert_btn, || is
+        gtk::show_alert(win, "Czesc z H#!", "To jest GtkAlertDialog wywolany w 100% z kodu H#.")
+    end)
+
+    app.on_click(quit_btn, || is
+        app.quit()
+    end)
+
+    win.present()
+    app.run()
+end
